@@ -17,7 +17,7 @@ def read_config(file_name='config.yaml'):
     return configs
 
 
-def signin(url, used_id, password, second_password):
+def signin_sb(url, used_id, password, second_password):
     # headless mode
     # option = Options()
     # option.add_argument('--headless')
@@ -175,10 +175,42 @@ def signin_rs(url, used_id, password, second_password):
     sleep(120)
 
 
+def signin_mufg(url, used_id, password):
+    # headless mode
+    # option = Options()
+    # option.add_argument('--headless')
+    # driver = webdriver.Chrome(options=option)
+
+    # normal mode
+    driver = webdriver.Chrome()
+
+    driver.get(url)
+    user_card_no = driver.find_element(by=By.ID, value="tx-contract-number")
+    user_card_no.send_keys(used_id)
+    user_password = driver.find_element(by=By.ID, value="tx-ib-password")
+    user_password.send_keys(password)
+    signin_button = driver.find_element(by=By.CLASS_NAME, value="gonext")
+    signin_button.click()
+
+    sleep(3)
+
+    driver.execute_script(
+        "JavaScript:goAnother('../ibp/toushin/ToushinKouzaShutoku.do'); return false;")
+
+    sleep(3)
+
+    button_sell = driver.find_element(by=By.CLASS_NAME, value='btn-sell')
+    button_sell.click()
+
+    sleep(30)
+
+
 if __name__ == "__main__":
     configs = read_config()
     # signin(configs['sbi']['url'], configs['sbi']['user_id'], configs['sbi']['password'],
     #        configs['sbi']['second_password'])
-    signin_rs(configs['rakuten']['url'], configs['rakuten']['user_id'], configs['rakuten']['password'],
-              configs['rakuten']['second_password'])
+    # signin_rs(configs['rakuten']['url'], configs['rakuten']['user_id'], configs['rakuten']['password'],
+    #           configs['rakuten']['second_password'])
+    signin_mufg(configs['mufg']['url'], configs['mufg']
+                ['user_id'], configs['mufg']['password'])
     pass
