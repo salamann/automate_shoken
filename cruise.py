@@ -202,7 +202,91 @@ def signin_mufg(url, used_id, password):
     button_sell = driver.find_element(by=By.CLASS_NAME, value='btn-sell')
     button_sell.click()
 
-    sleep(30)
+    sleep(3)
+
+    def hit_tsugihe(driver):
+        button_next = driver.find_element(by=By.XPATH,
+                                          value="//a[img[@alt='次へ']]")
+        button_next.click()
+
+    hit_tsugihe(driver)
+    sleep(2)
+    hit_tsugihe(driver)
+    sleep(3)
+
+    sell_button = driver.find_element(by=By.XPATH,
+                                      value="//label[contains(text(), '全部解約')]")
+    sell_button.click()
+    hit_tsugihe(driver)
+    sleep(2)
+
+    button_next = driver.find_element(by=By.XPATH,
+                                      value="//a[img[@alt='解約']]")
+    button_next.click()
+    sleep(300)
+
+
+def signin_mnx(url, used_id, password, second_password):
+    # headless mode
+    # option = Options()
+    # option.add_argument('--headless')
+    # driver = webdriver.Chrome(options=option)
+
+    # normal mode
+    driver = webdriver.Chrome()
+
+    driver.get(url)
+    user_card_no = driver.find_element(by=By.ID, value="loginid")
+    user_card_no.send_keys(used_id)
+    user_password = driver.find_element(by=By.ID, value="passwd")
+    user_password.send_keys(password)
+    signin_button = driver.find_element(by=By.XPATH,
+                                        value="//input[@value='ログイン']")
+    signin_button.click()
+
+    sleep(3)
+
+    def a_in_li_element(text_name):
+        li_elements = driver.find_elements(by=By.TAG_NAME, value='li')
+        [li_element] = [_li for _li in li_elements if _li.text == text_name]
+        return li_element.find_element(by=By.TAG_NAME, value='a')
+
+    a_in_li_element('投信・積立').click()
+
+    sleep(3)
+
+    a_in_li_element('保有残高・売却').click()
+
+    tr_elements = driver.find_elements(by=By.TAG_NAME, value='tr')
+    # [tr_element] = [_tr for _tr in tr_elements if '全世界株式' in _tr.text]
+    [tr_element] = [_tr for _tr in tr_elements if '国内債券' in _tr.text]
+
+    a_elements = tr_element.find_elements(by=By.TAG_NAME, value='a')
+    [a_element] = [_a for _a in a_elements if '売却' in _a.text]
+    a_element.click()
+
+    sleep(3)
+
+    labels = driver.find_elements(by=By.TAG_NAME, value='label')
+    [radio_button] = [_label for _label in labels if '全部解約' in _label.text]
+    radio_button.click()
+    labels = driver.find_elements(by=By.TAG_NAME, value='label')
+    [radio_button] = [_label for _label in labels if 'はい' in _label.text]
+    radio_button.click()
+
+    confirm_button = driver.find_element(by=By.XPATH,
+                                         value="//input[@value='次へ（注文内容確認）']")
+    confirm_button.click()
+    sleep(3)
+
+    second_password_element = driver.find_element(by=By.ID, value='idPinNo')
+    second_password_element.send_keys(second_password)
+
+    sleep(120)
+
+    # confirm_button = driver.find_element(by=By.XPATH,
+    #                                      value="//input[@value='実行する']")
+    # confirm_button.click()
 
 
 if __name__ == "__main__":
@@ -213,4 +297,8 @@ if __name__ == "__main__":
     #           configs['rakuten']['second_password'])
     signin_mufg(configs['mufg']['url'], configs['mufg']
                 ['user_id'], configs['mufg']['password'])
+    # signin_mnx(configs['monex']['url'],
+    #            configs['monex']['user_id'],
+    #            configs['monex']['password'],
+    #            configs['monex']['second_password'])
     pass
