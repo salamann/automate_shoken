@@ -240,38 +240,36 @@ def signin_mnx(url, used_id, password, second_password):
     user_card_no.send_keys(used_id)
     user_password = driver.find_element(by=By.ID, value="passwd")
     user_password.send_keys(password)
-    signin_button = driver.find_element(by=By.XPATH,
-                                        value="//input[@value='ログイン']")
-    signin_button.click()
+    signin_button = driver.find_element(by=By.ID,
+                                        value="contents")
+    signin_button.submit()
 
     sleep(3)
 
-    def a_in_li_element(text_name):
-        li_elements = driver.find_elements(by=By.TAG_NAME, value='li')
-        [li_element] = [_li for _li in li_elements if _li.text == text_name]
-        return li_element.find_element(by=By.TAG_NAME, value='a')
-
-    a_in_li_element('投信・積立').click()
+    mutual_fund_button = driver.find_element(by=By.XPATH,
+                                             value='//a[contains(text(), "投信・積立")]')
+    mutual_fund_button.click()
 
     sleep(3)
 
-    a_in_li_element('保有残高・売却').click()
+    sell_button = driver.find_element(by=By.XPATH,
+                                      value="//a[contains(text(), '保有残高・売却')]")
+    sell_button.click()
 
-    tr_elements = driver.find_elements(by=By.TAG_NAME, value='tr')
-    # [tr_element] = [_tr for _tr in tr_elements if '全世界株式' in _tr.text]
-    [tr_element] = [_tr for _tr in tr_elements if '国内債券' in _tr.text]
-
-    a_elements = tr_element.find_elements(by=By.TAG_NAME, value='a')
-    [a_element] = [_a for _a in a_elements if '売却' in _a.text]
+    fund_name_flake = '日本債券'
+    tr_element = driver.find_element(by=By.XPATH,
+                                     value=f'//tr[td[a[strong[contains(text(), "{fund_name_flake}")]]]]')
+    a_element = tr_element.find_element(by=By.XPATH,
+                                        value='//a[span[contains(text(), "売却")]]')
     a_element.click()
 
     sleep(3)
 
-    labels = driver.find_elements(by=By.TAG_NAME, value='label')
-    [radio_button] = [_label for _label in labels if '全部解約' in _label.text]
+    radio_button = driver.find_element(by=By.XPATH,
+                                       value='//label[strong[contains(text(), "全部解約")]]')
     radio_button.click()
-    labels = driver.find_elements(by=By.TAG_NAME, value='label')
-    [radio_button] = [_label for _label in labels if 'はい' in _label.text]
+    radio_button = driver.find_element(by=By.XPATH,
+                                       value='//label[contains(text(), "はい")]')
     radio_button.click()
 
     confirm_button = driver.find_element(by=By.XPATH,
@@ -295,10 +293,10 @@ if __name__ == "__main__":
     #        configs['sbi']['second_password'])
     # signin_rs(configs['rakuten']['url'], configs['rakuten']['user_id'], configs['rakuten']['password'],
     #           configs['rakuten']['second_password'])
-    signin_mufg(configs['mufg']['url'], configs['mufg']
-                ['user_id'], configs['mufg']['password'])
-    # signin_mnx(configs['monex']['url'],
-    #            configs['monex']['user_id'],
-    #            configs['monex']['password'],
-    #            configs['monex']['second_password'])
+    # signin_mufg(configs['mufg']['url'], configs['mufg']
+    #             ['user_id'], configs['mufg']['password'])
+    signin_mnx(configs['monex']['url'],
+               configs['monex']['user_id'],
+               configs['monex']['password'],
+               configs['monex']['second_password'])
     pass
