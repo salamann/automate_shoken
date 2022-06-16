@@ -1,9 +1,6 @@
-from ast import FunctionDef
+
 import yaml
 from time import sleep
-from datetime import datetime, timedelta
-import smtplib
-from email.mime.text import MIMEText
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -79,11 +76,9 @@ def signin_rs(url, used_id, password, second_password):
     sleep(3)
 
     # hit 投資信託 button
-    a_elements = driver.find_elements(by=By.TAG_NAME, value='a')
-    for a_element in a_elements:
-        if a_element.text == "投資信託":
-            a_element.click()
-            break
+    a_element = driver.find_element(by=By.XPATH,
+                                    value='//a[span[contains(text(), "投資信託")]]')
+    a_element.click()
 
     # hit normal mode if it happens
     try:
@@ -94,43 +89,21 @@ def signin_rs(url, used_id, password, second_password):
         pass
 
     # hit 保有商品一覧 button
-    a_elements = driver.find_elements(by=By.TAG_NAME, value='a')
-    for a_element in a_elements:
-        try:
-            img_element = a_element.find_element(by=By.TAG_NAME, value='img')
-            if "保有商品一覧" == img_element.get_attribute('title'):
-                a_element.click()
-                break
-        except NoSuchElementException:
-            pass
+    a_element = driver.find_element(by=By.XPATH,
+                                    value='//a[img[@title="保有商品一覧"]]')
+    a_element.click()
 
     # select 売却 for a specified stock
-    table = driver.find_element(by=By.ID, value='poss-tbl-sp')
-    tr_elements = table.find_elements(by=By.TAG_NAME, value='tr')
-    for tr_element in tr_elements:
-        # if "国内債券インデックス" in tr_element.text:
-        if "全世界株式" in tr_element.text:
-            a_elements = tr_element.find_elements(by=By.TAG_NAME, value='a')
-            break
-    is_click = False
-    for a_element in a_elements:
-        try:
-            img_elements = a_element.find_elements(by=By.TAG_NAME, value='img')
-            for img_element in img_elements:
-                print(img_element.get_attribute('alt'))
-                if img_element.get_attribute('alt') == '売却':
-                    a_element.click()
-                    is_click = True
-                    break
-        except NoSuchElementException:
-            pass
-        if is_click:
-            break
+    fund_name_flake = "日本債券"
+    tr_element = driver.find_element(by=By.XPATH,
+                                     value=f'//tr[td[div[a[contains(text(), "{fund_name_flake}")]]]]')
+    a_element = tr_element.find_element(by=By.XPATH,
+                                        value='//a[img[@alt="売却"]]')
+    a_element.click()
 
     # select sell all
-    # radio_button = driver.find_element(by=By.NAME, value='convCashFlg')
-    radio_button = driver.find_element(
-        by=By.ID, value='radio-img-cash-cd-all')
+    radio_button = driver.find_element(by=By.XPATH,
+                                       value='//label[span[span[span[span[contains(text(), "全部売却")]]]]]')
     radio_button.click()
     confirm_button = driver.find_element(by=By.ID, value='submitBtn1')
     confirm_button.click()
@@ -260,12 +233,14 @@ def signin_mnx(url, used_id, password, second_password):
 
 if __name__ == "__main__":
     configs = read_config()
-    signin_sb(configs['sbi']['url'],
-              configs['sbi']['user_id'],
-              configs['sbi']['password'],
-              configs['sbi']['second_password'])
-    # signin_rs(configs['rakuten']['url'], configs['rakuten']['user_id'], configs['rakuten']['password'],
-    #           configs['rakuten']['second_password'])
+    # signin_sb(configs['sbi']['url'],
+    #           configs['sbi']['user_id'],
+    #           configs['sbi']['password'],
+    #           configs['sbi']['second_password'])
+    signin_rs(configs['rakuten']['url'],
+              configs['rakuten']['user_id'],
+              configs['rakuten']['password'],
+              configs['rakuten']['second_password'])
     # signin_mufg(configs['mufg']['url'], configs['mufg']
     #             ['user_id'], configs['mufg']['password'])
     # signin_mnx(configs['monex']['url'],
