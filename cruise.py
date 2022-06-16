@@ -1,3 +1,4 @@
+from ast import FunctionDef
 import yaml
 from time import sleep
 from datetime import datetime, timedelta
@@ -35,52 +36,22 @@ def signin_sb(url, used_id, password, second_password):
     signin_button.click()
 
     sleep(3)
-    # hit the portfolio button
-    a_elements = driver.find_elements(by=By.TAG_NAME, value='a')
-    for a_element in a_elements:
-        try:
-            img = a_element.find_element(by=By.TAG_NAME, value='img')
-            alt = img.get_attribute('alt')
-            # print(alt)
-            if alt == 'ポートフォリオ':
-                portfolio_url = a_element.get_attribute('href')
-                driver.get(portfolio_url)
-                break
-        except NoSuchElementException:
-            pass
+    a_element = driver.find_element(by=By.XPATH,
+                                    value="//a[img[@title='ポートフォリオ']]")
+    a_element.click()
 
-    # hit the sell button
-    tr_elements = driver.find_elements(by=By.TAG_NAME, value='tr')
-    for tr_element in tr_elements:
-        td_elements = tr_element.find_elements(by=By.TAG_NAME, value='td')
-        for td_element in td_elements:
-            if '全世界株式' in td_element.text:
-                # if '国内債券インデックス' in td_element.text:
-                a_elements = tr_element.find_elements(
-                    by=By.TAG_NAME, value='a')
-                for a_element in a_elements:
-                    if '売却' in a_element.text:
-                        sale_url = a_element.get_attribute('href')
-                        driver.get(sale_url)
-                        break
-            else:
-                continue
-            break
-        else:
-            continue
-        break
+    fund_name_flake = "日本債権"
+    tr_element = driver.find_element(by=By.XPATH,
+                                     value=f'//tr[td[a[contains(text(), "{fund_name_flake}")]]]')
+    a_element = tr_element.find_element(by=By.XPATH,
+                                        value='//a[font[contains(text(), "売却")]]')
+    a_element.click()
 
     # fill the blanks and hit the sell button
     radio_button = driver.find_element(by=By.ID, value='buy_sell_202')
     radio_button.click()
-    # password_field = driver.find_element(by=By.ID, value='pwd1')
-    # password_field.send_keys()
-    # password_field = driver.find_element(by=By.ID, value='pwd2')
-    # password_field.send_keys()
     password_field = driver.find_element(by=By.ID, value='pwd3')
     password_field.send_keys(second_password)
-    # password_field = driver.find_element(by=By.ID, value='pwd4')
-    # password_field.send_keys()
     check_box = driver.find_element(by=By.NAME, value='skip_estimate')
     check_box.click()
     # radio_button = driver.find_element(by=By.NAME, value='ACT_place')
@@ -289,14 +260,16 @@ def signin_mnx(url, used_id, password, second_password):
 
 if __name__ == "__main__":
     configs = read_config()
-    # signin(configs['sbi']['url'], configs['sbi']['user_id'], configs['sbi']['password'],
-    #        configs['sbi']['second_password'])
+    signin_sb(configs['sbi']['url'],
+              configs['sbi']['user_id'],
+              configs['sbi']['password'],
+              configs['sbi']['second_password'])
     # signin_rs(configs['rakuten']['url'], configs['rakuten']['user_id'], configs['rakuten']['password'],
     #           configs['rakuten']['second_password'])
     # signin_mufg(configs['mufg']['url'], configs['mufg']
     #             ['user_id'], configs['mufg']['password'])
-    signin_mnx(configs['monex']['url'],
-               configs['monex']['user_id'],
-               configs['monex']['password'],
-               configs['monex']['second_password'])
+    # signin_mnx(configs['monex']['url'],
+    #            configs['monex']['user_id'],
+    #            configs['monex']['password'],
+    #            configs['monex']['second_password'])
     pass
