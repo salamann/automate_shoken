@@ -41,10 +41,14 @@ def signin_sb(url, used_id, password, second_password):
 
     fund_name_flake = "国内債券"
     try:
-        tr_element = driver.find_element(by=By.XPATH,
-                                         value=f'//tr[td[a[contains(text(), "{fund_name_flake}")]]]')
-        a_element = tr_element.find_element(by=By.XPATH,
-                                            value='//a[font[contains(text(), "売却")]]')
+        table_element = driver.find_element(
+            by=By.XPATH, value=f'//table[tbody[tr[td[a[contains(text(), "{fund_name_flake}")]]]]]')
+        [df_fund] = pandas.read_html(table_element.get_attribute('outerHTML'))
+        df_fund.columns = df_fund.loc[0, :].to_list()
+        df_fund = df_fund.loc[1:, :]
+        index = df_fund['ファンド名'].str.contains('国内債券').to_list().index(True)
+        a_element = table_element.find_elements(
+            by=By.XPATH, value='//a[font[contains(text(), "売却")]]')[index]
         a_element.click()
 
         # fill the blanks and hit the sell button
