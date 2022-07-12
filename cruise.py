@@ -106,10 +106,13 @@ def signin_rs(url, used_id, password, second_password):
     # select 売却 for a specified stock
     fund_name_flake = "国内債券"
     try:
-        tr_element = driver.find_element(by=By.XPATH,
-                                         value=f'//tr[td[div[a[contains(text(), "{fund_name_flake}")]]]]')
-        a_element = tr_element.find_element(by=By.XPATH,
-                                            value='//a[img[@alt="売却"]]')
+        table_element = driver.find_element(
+            by=By.XPATH, value=f'//table[tbody[tr[td[div[a[contains(text(), "{fund_name_flake}")]]]]]]')
+        df_fund = pandas.read_html(table_element.get_attribute('outerHTML'))[0]
+        df_fund = df_fund[~df_fund['あしあと'].isnull()]
+        index = df_fund['ファンド'].str.contains('国内債券').to_list().index(True)
+        a_element = table_element.find_elements(
+            by=By.XPATH, value='//a[img[@alt="売却"]]')[index]
         a_element.click()
 
         # select sell all
