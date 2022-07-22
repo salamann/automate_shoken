@@ -5,10 +5,33 @@ from time import sleep
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, UnexpectedAlertPresentException
 import pandas
+
+
+def webdriver_start(mode='b') -> WebDriver:
+    # headless mode
+    if mode == "h":
+        option = Options()
+        option.add_argument('--headless')
+        return webdriver.Chrome(options=option)
+
+    # normal mode
+    if mode == "n":
+        return webdriver.Chrome()
+
+    # chrome beta mode
+    if mode == "b":
+        options = Options()
+        configs = read_config(file_name='driver_settings.yaml')
+        options.binary_location = configs['chrome']['path']
+        chrome_service = Service(
+            executable_path=configs['chrome']['driver_path'])
+
+        return webdriver.Chrome(service=chrome_service, options=options)
 
 
 def read_config(file_name='config.yaml'):
@@ -17,14 +40,9 @@ def read_config(file_name='config.yaml'):
     return configs
 
 
-def signin_sb(url, used_id, password, second_password):
-    # headless mode
-    # option = Options()
-    # option.add_argument('--headless')
-    # driver = webdriver.Chrome(options=option)
-
-    # normal mode
-    driver = webdriver.Chrome()
+def signin_sb(url, used_id, password, second_password,
+              fund_name_flake="国内債券"):
+    driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.NAME, value="user_id")
@@ -39,7 +57,6 @@ def signin_sb(url, used_id, password, second_password):
                                     value="//a[img[@title='ポートフォリオ']]")
     a_element.click()
 
-    fund_name_flake = "国内債券"
     try:
         table_element = driver.find_element(
             by=By.XPATH, value=f'//table[tbody[tr[td[a[contains(text(), "{fund_name_flake}")]]]]]')
@@ -66,14 +83,9 @@ def signin_sb(url, used_id, password, second_password):
         return False
 
 
-def signin_rs(url, used_id, password, second_password):
-    # headless mode
-    # option = Options()
-    # option.add_argument('--headless')
-    # driver = webdriver.Chrome(options=option)
-
-    # normal mode
-    driver = webdriver.Chrome()
+def signin_rs(url, used_id, password, second_password,
+              fund_name_flake="国内債券"):
+    driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="form-login-id")
@@ -104,7 +116,6 @@ def signin_rs(url, used_id, password, second_password):
     a_element.click()
 
     # select 売却 for a specified stock
-    fund_name_flake = "国内債券"
     try:
         table_element = driver.find_element(
             by=By.XPATH, value=f'//table[tbody[tr[td[div[a[contains(text(), "{fund_name_flake}")]]]]]]')
@@ -137,13 +148,7 @@ def signin_rs(url, used_id, password, second_password):
 
 
 def signin_mufg(url, used_id, password):
-    # headless mode
-    # option = Options()
-    # option.add_argument('--headless')
-    # driver = webdriver.Chrome(options=option)
-
-    # normal mode
-    driver = webdriver.Chrome()
+    driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="tx-contract-number")
@@ -191,14 +196,9 @@ def signin_mufg(url, used_id, password):
         return False
 
 
-def signin_mnx(url, used_id, password, second_password):
-    # headless mode
-    # option = Options()
-    # option.add_argument('--headless')
-    # driver = webdriver.Chrome(options=option)
-
-    # normal mode
-    driver = webdriver.Chrome()
+def signin_mnx(url, used_id, password, second_password,
+               fund_name_flake='国内債券'):
+    driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="loginid")
@@ -221,7 +221,6 @@ def signin_mnx(url, used_id, password, second_password):
                                       value="//a[contains(text(), '保有残高・売却')]")
     sell_button.click()
 
-    fund_name_flake = '国内債券'
     try:
         table_element = driver.find_element(
             by=By.XPATH, value=f'//table[tbody[tr[td[a[strong[contains(text(), "{fund_name_flake}")]]]]]]')
@@ -269,6 +268,11 @@ if __name__ == "__main__":
                                               configs['rakuten']['user_id'],
                                               configs['rakuten']['password'],
                                               configs['rakuten']['second_password'])
+    rakuten2 = signin_rs(configs['rakuten']['url'],
+                         configs['rakuten']['user_id'],
+                         configs['rakuten']['password'],
+                         configs['rakuten']['second_password'],
+                         fund_name_flake='安定収益追求')
     configs['mufg']['is_sell'] = signin_mufg(configs['mufg']['url'],
                                              configs['mufg']['user_id'],
                                              configs['mufg']['password'])
@@ -276,7 +280,7 @@ if __name__ == "__main__":
                                              configs['monex']['user_id'],
                                              configs['monex']['password'],
                                              configs['monex']['second_password'])
-    text = f"{str(datetime.today().date())},{configs['sbi']['is_sell']},{configs['rakuten']['is_sell']},{configs['mufg']['is_sell']},{configs['monex']['is_sell']}\n"
+    text = f"{str(datetime.today().date())},{configs['sbi']['is_sell']},{configs['rakuten']['is_sell']},{configs['mufg']['is_sell']},{configs['monex']['is_sell']},{rakuten2}\n"
 
     with open("log.csv", "a", encoding="utf-8") as f:
         f.write(text)
