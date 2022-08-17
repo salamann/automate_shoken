@@ -239,8 +239,8 @@ def move_point_mnx(url, used_id, password):
     [index_ponta1, index_ponta2] = [i for i, _ in enumerate(
         df_fund._values) if 'Ponta' in _[0]]
     point_number = table.find_elements(by=By.TAG_NAME,
-                                       value='tr')[index_ponta1+2].find_elements(by=By.TAG_NAME,
-                                                                                 value='td')[-1]
+                                       value='tr')[index_ponta1 + 2].find_elements(by=By.TAG_NAME,
+                                                                                   value='td')[-1]
     point_number = point_number.text.replace('個', '').strip()
     try:
         driver.get(table.find_elements(by=By.TAG_NAME,
