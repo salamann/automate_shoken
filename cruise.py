@@ -12,6 +12,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException, UnexpectedAlertPresentException
 import pandas
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def send_email(to_email, subject, message, smtp_server, smtp_port_number, smtp_user_name, smtp_password, from_email) -> None:
@@ -33,11 +34,11 @@ def webdriver_start(mode='n') -> WebDriver:
     if mode == "h":
         option = Options()
         option.add_argument('--headless')
-        return webdriver.Chrome(options=option)
+        return webdriver.Chrome(ChromeDriverManager().install(), options=option)
 
     # normal mode
     if mode == "n":
-        return webdriver.Chrome()
+        return webdriver.Chrome(ChromeDriverManager().install())
 
     # chrome beta mode
     if mode == "b":
@@ -375,5 +376,3 @@ if __name__ == "__main__":
     from config import smtp_server, smtp_port_number, smtp_user_name, smtp_password
     send_email(to_email, 'Fund Status', str(responses), smtp_server, smtp_port_number, smtp_user_name,
                smtp_password, from_email)
-    # move_point_mnx(configs['monex']['url'], configs['monex']['user_id'],
-    #                configs['monex']['password'], configs['monex']['second_password'])
