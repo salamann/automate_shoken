@@ -2,6 +2,8 @@
 from datetime import datetime
 import yaml
 from time import sleep
+import smtplib
+from email.mime.text import MIMEText
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -12,7 +14,21 @@ from selenium.common.exceptions import NoSuchElementException, ElementNotInterac
 import pandas
 
 
-def webdriver_start(mode='b') -> WebDriver:
+def send_email(to_email, subject, message, smtp_server, smtp_port_number, smtp_user_name, smtp_password, from_email) -> None:
+    msg = MIMEText(message, "html", "utf-8")
+    msg["Subject"] = subject
+    msg["To"] = to_email
+    msg["From"] = from_email
+
+    server = smtplib.SMTP(smtp_server, smtp_port_number)
+    server.starttls()
+    server.login(smtp_user_name, smtp_password)
+    server.send_message(msg)
+
+    server.quit()
+
+
+def webdriver_start(mode='n') -> WebDriver:
     # headless mode
     if mode == "h":
         option = Options()
@@ -40,8 +56,7 @@ def read_config(file_name='config.yaml'):
     return configs
 
 
-def signin_sb(url, used_id, password, second_password,
-              fund_name_flake="国内債券"):
+def signin_sb(url, used_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
@@ -59,11 +74,11 @@ def signin_sb(url, used_id, password, second_password,
 
     try:
         table_element = driver.find_element(
-            by=By.XPATH, value=f'//table[tbody[tr[td[a[contains(text(), "{fund_name_flake}")]]]]]')
+            by=By.XPATH, value=f'//table[tbody[tr[td[a[contains(text(), "{fund_name}")]]]]]')
         [df_fund] = pandas.read_html(table_element.get_attribute('outerHTML'))
         df_fund.columns = df_fund.loc[0, :].to_list()
         df_fund = df_fund.loc[1:, :]
-        index = df_fund['ファンド名'].str.contains('国内債券').to_list().index(True)
+        index = df_fund['ファンド名'].str.contains(fund_name).to_list().index(True)
         a_element = table_element.find_elements(
             by=By.XPATH, value='//a[font[contains(text(), "売却")]]')[index]
         a_element.click()
@@ -83,8 +98,7 @@ def signin_sb(url, used_id, password, second_password,
         return False
 
 
-def signin_rs(url, used_id, password, second_password,
-              fund_name_flake="国内債券"):
+def signin_rs(url, used_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
@@ -118,10 +132,10 @@ def signin_rs(url, used_id, password, second_password,
     # select 売却 for a specified stock
     try:
         table_element = driver.find_element(
-            by=By.XPATH, value=f'//table[tbody[tr[td[div[a[contains(text(), "{fund_name_flake}")]]]]]]')
+            by=By.XPATH, value=f'//table[tbody[tr[td[div[a[contains(text(), "{fund_name}")]]]]]]')
         df_fund = pandas.read_html(table_element.get_attribute('outerHTML'))[0]
         df_fund = df_fund[~df_fund['あしあと'].isnull()]
-        index = df_fund['ファンド'].str.contains('国内債券').to_list().index(True)
+        index = df_fund['ファンド'].str.contains(fund_name).to_list().index(True)
         a_element = table_element.find_elements(
             by=By.XPATH, value='//a[img[@alt="売却"]]')[index]
         a_element.click()
@@ -147,7 +161,7 @@ def signin_rs(url, used_id, password, second_password,
         return False
 
 
-def signin_mufg(url, used_id, password):
+def signin_mufg(url, used_id, password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
@@ -196,8 +210,8 @@ def signin_mufg(url, used_id, password):
         return False
 
 
-def signin_mnx(url, used_id, password, second_password,
-               fund_name_flake='国内債券'):
+def signin_mnx(url, used_id, password):
+
     driver = webdriver_start()
 
     driver.get(url)
@@ -210,6 +224,72 @@ def signin_mnx(url, used_id, password, second_password,
     signin_button.submit()
 
     sleep(3)
+    return driver
+
+
+def move_point_mnx(url, used_id, password):
+    driver: WebDriver = signin_mnx(url, used_id, password)
+    mutual_fund_button = driver.find_element(by=By.XPATH,
+                                             value='//a[text()="ポイント交換"]')
+    mutual_fund_button.click()
+    sleep(3)
+    table = driver.find_elements(by=By.TAG_NAME, value='table')[1]
+    [df_fund] = pandas.read_html(table.get_attribute('outerHTML'))
+    [index_ponta1, index_ponta2] = [i for i, _ in enumerate(
+        df_fund._values) if 'Ponta' in _[0]]
+    point_number = table.find_elements(by=By.TAG_NAME,
+                                       value='tr')[index_ponta1+2].find_elements(by=By.TAG_NAME,
+                                                                                 value='td')[-1]
+    point_number = point_number.text.replace('個', '').strip()
+    try:
+        driver.get(table.find_elements(by=By.TAG_NAME,
+                                       value='a')[index_ponta2].get_attribute('href'))
+        sleep(3)
+        input_box = driver.find_element(by=By.NAME, value='orderQuantity')
+        input_box.send_keys(point_number)
+        input_box.submit()
+        sleep(3)
+        input_box = driver.find_element(by=By.NAME, value='modifyBtn')
+        input_box.submit()
+        return True
+    except IndexError:
+        return False
+
+
+def move_money_mnx(url, used_id, password, second_password):
+    driver: WebDriver = signin_mnx(url, used_id, password)
+
+    mutual_fund_button = driver.find_element(by=By.XPATH,
+                                             value='//a[contains(text(), "入出金")]')
+    mutual_fund_button.click()
+    sleep(3)
+    mutual_fund_button = driver.find_element(by=By.XPATH,
+                                             value='//a[text()="出金指示"]')
+    driver.get(mutual_fund_button.get_attribute('href'))
+    # mutual_fund_button.click()
+    table = driver.find_element(by=By.TAG_NAME, value='table')
+    [df_fund] = pandas.read_html(table.get_attribute('outerHTML'))
+    try:
+        max_amount = df_fund[df_fund[0].str.contains('出金可能額')].loc[:, 1].to_list()[
+            0]
+        max_amount = max_amount.replace('円', '').replace(',', '')
+
+        input_amount = driver.find_element(by=By.ID, value="Amount")
+        input_amount.send_keys(max_amount)
+        input_amount.submit()
+        sleep(3)
+
+        input_amount = driver.find_element(by=By.ID, value="idPinNo")
+        input_amount.send_keys(second_password)
+        input_amount.submit()
+        return True
+    except IndexError:
+        return False
+
+
+def sell_mnx(url, used_id, password, second_password,
+             fund_name):
+    driver: WebDriver = signin_mnx(url, used_id, password)
 
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[contains(text(), "投信・積立")]')
@@ -223,9 +303,9 @@ def signin_mnx(url, used_id, password, second_password,
 
     try:
         table_element = driver.find_element(
-            by=By.XPATH, value=f'//table[tbody[tr[td[a[strong[contains(text(), "{fund_name_flake}")]]]]]]')
+            by=By.XPATH, value=f'//table[tbody[tr[td[a[strong[contains(text(), "{fund_name}")]]]]]]')
         [df_fund] = pandas.read_html(table_element.get_attribute('outerHTML'))
-        index = df_fund['銘柄'].str.contains('国内債券').to_list().index(True)
+        index = df_fund['銘柄'].str.contains(fund_name).to_list().index(True)
         a_element = table_element.find_elements(
             by=By.XPATH, value='//a[span[contains(text(), "売却")]]')[index]
         a_element.click()
@@ -258,29 +338,42 @@ def signin_mnx(url, used_id, password, second_password,
         return False
 
 
+def wrapper(payload: dict) -> bool:
+    func: callable = globals()[payload['func_name']]
+    try:
+        if ('second_password' in payload) & ('fund_name' in payload):
+            response = func(
+                payload['url'], payload['user_id'], payload['password'], payload['second_password'], payload['fund_name'])
+        elif ('second_password' not in payload) & ('fund_name' in payload):
+            response = func(
+                payload['url'], payload['user_id'], payload['password'], payload['fund_name'])
+        elif ('second_password' in payload) & ('fund_name' not in payload):
+            response = func(
+                payload['url'], payload['user_id'], payload['password'], payload['second_password'])
+        elif ('second_password' not in payload) & ('fund_name' not in payload):
+            response = func(
+                payload['url'], payload['user_id'], payload['password'])
+
+    except Exception as e:
+        response = str(e)
+    return response
+
+
 if __name__ == "__main__":
     configs = read_config()
-    configs['sbi']['is_sell'] = signin_sb(configs['sbi']['url'],
-                                          configs['sbi']['user_id'],
-                                          configs['sbi']['password'],
-                                          configs['sbi']['second_password'])
-    configs['rakuten']['is_sell'] = signin_rs(configs['rakuten']['url'],
-                                              configs['rakuten']['user_id'],
-                                              configs['rakuten']['password'],
-                                              configs['rakuten']['second_password'])
-    rakuten2 = signin_rs(configs['rakuten']['url'],
-                         configs['rakuten']['user_id'],
-                         configs['rakuten']['password'],
-                         configs['rakuten']['second_password'],
-                         fund_name_flake='安定収益追求')
-    configs['mufg']['is_sell'] = signin_mufg(configs['mufg']['url'],
-                                             configs['mufg']['user_id'],
-                                             configs['mufg']['password'])
-    configs['monex']['is_sell'] = signin_mnx(configs['monex']['url'],
-                                             configs['monex']['user_id'],
-                                             configs['monex']['password'],
-                                             configs['monex']['second_password'])
-    text = f"{str(datetime.today().date())},{configs['sbi']['is_sell']},{configs['rakuten']['is_sell']},{configs['mufg']['is_sell']},{configs['monex']['is_sell']},{rakuten2}\n"
+
+    responses = {}
+    text = f"{str(datetime.today().date())}"
+    for key, value in configs.items():
+        responses[key] = wrapper(value)
+        text += f',{responses[key]}'
 
     with open("log.csv", "a", encoding="utf-8") as f:
         f.write(text)
+
+    from config import from_email, to_email
+    from config import smtp_server, smtp_port_number, smtp_user_name, smtp_password
+    send_email(to_email, 'Fund Status', str(responses), smtp_server, smtp_port_number, smtp_user_name,
+               smtp_password, from_email)
+    # move_point_mnx(configs['monex']['url'], configs['monex']['user_id'],
+    #                configs['monex']['password'], configs['monex']['second_password'])
