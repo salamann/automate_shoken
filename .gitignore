@@ -4,3 +4,6 @@ driver_settings.yaml
 log.csv
 config.py
 __pycache__/config.cpython-310.pyc
+config_monex.yaml
+monex.png
+log.txt

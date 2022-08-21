@@ -29,12 +29,19 @@ def send_email(to_email, subject, message, smtp_server, smtp_port_number, smtp_u
     server.quit()
 
 
-def webdriver_start(mode='n') -> WebDriver:
+def webdriver_start(mode='h') -> WebDriver:
     # headless mode
     if mode == "h":
-        option = Options()
-        option.add_argument('--headless')
-        return webdriver.Chrome(ChromeDriverManager().install(), options=option)
+        options = Options()
+        # options.binary_location = '/usr/bin/google-chrome'
+        options.add_argument('--no-sandbox')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--lang=ja-JP')
+        options.add_argument(
+            'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
+
+        return webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
     # normal mode
     if mode == "n":
@@ -216,13 +223,15 @@ def signin_mnx(url, used_id, password):
     driver = webdriver_start()
 
     driver.get(url)
+    driver.save_screenshot("monex.png")
     user_card_no = driver.find_element(by=By.ID, value="loginid")
     user_card_no.send_keys(used_id)
     user_password = driver.find_element(by=By.ID, value="passwd")
     user_password.send_keys(password)
-    signin_button = driver.find_element(by=By.ID,
-                                        value="contents")
-    signin_button.submit()
+    user_password.submit()
+    # signin_button = driver.find_element(by=By.ID,
+    #                                     value="contents")
+    # signin_button.submit()
 
     sleep(3)
     return driver
