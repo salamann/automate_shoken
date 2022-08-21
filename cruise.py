@@ -223,7 +223,6 @@ def signin_mnx(url, used_id, password):
     driver = webdriver_start()
 
     driver.get(url)
-    driver.save_screenshot("monex.png")
     user_card_no = driver.find_element(by=By.ID, value="loginid")
     user_card_no.send_keys(used_id)
     user_password = driver.find_element(by=By.ID, value="passwd")
