@@ -41,11 +41,11 @@ def webdriver_start(mode='h') -> WebDriver:
         options.add_argument(
             'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
 
-        return webdriver.Chrome(Service(ChromeDriverManager().install()), options=options)
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     # normal mode
     if mode == "n":
-        return webdriver.Chrome(Service(ChromeDriverManager().install()))
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
     # chrome beta mode
     if mode == "b":
