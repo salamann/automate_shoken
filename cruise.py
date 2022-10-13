@@ -146,7 +146,8 @@ def signin_rs(url, used_id, password, second_password, fund_name):
         index = df_fund['ファンド'].str.contains(fund_name).to_list().index(True)
         a_element = table_element.find_elements(
             by=By.XPATH, value='//a[img[@alt="売却"]]')[index]
-        a_element.click()
+        driver.execute_script("arguments[0].click();", a_element)
+        # a_element.click()
 
         # select sell all
         radio_button = driver.find_element(by=By.XPATH,
