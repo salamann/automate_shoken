@@ -64,12 +64,12 @@ def read_config(file_name='config.yaml'):
     return configs
 
 
-def signin_sb(url, used_id, password, second_password, fund_name):
+def signin_sb(url, user_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.NAME, value="user_id")
-    user_card_no.send_keys(used_id)
+    user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.NAME, value="user_password")
     user_password.send_keys(password)
     signin_button = driver.find_element(by=By.NAME, value="ACT_login")
@@ -106,12 +106,12 @@ def signin_sb(url, used_id, password, second_password, fund_name):
         return False
 
 
-def signin_rs(url, used_id, password, second_password, fund_name):
+def signin_rs(url, user_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="form-login-id")
-    user_card_no.send_keys(used_id)
+    user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="form-login-pass")
     user_password.send_keys(password)
     signin_button = driver.find_element(by=By.ID, value="login-btn")
@@ -170,12 +170,12 @@ def signin_rs(url, used_id, password, second_password, fund_name):
         return False
 
 
-def signin_mufg(url, used_id, password, fund_name):
+def signin_mufg(url, user_id, password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="tx-contract-number")
-    user_card_no.send_keys(used_id)
+    user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="tx-ib-password")
     user_password.send_keys(password)
     signin_button = driver.find_element(by=By.CLASS_NAME, value="gonext")
@@ -219,13 +219,13 @@ def signin_mufg(url, used_id, password, fund_name):
         return False
 
 
-def signin_mnx(url, used_id, password):
+def signin_mnx(url, user_id, password):
 
     driver = webdriver_start()
 
     driver.get(url)
     user_card_no = driver.find_element(by=By.ID, value="loginid")
-    user_card_no.send_keys(used_id)
+    user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="passwd")
     user_password.send_keys(password)
     user_password.submit()
@@ -237,8 +237,8 @@ def signin_mnx(url, used_id, password):
     return driver
 
 
-def move_point_mnx(url, used_id, password):
-    driver: WebDriver = signin_mnx(url, used_id, password)
+def move_point_mnx(url, user_id, password):
+    driver: WebDriver = signin_mnx(url, user_id, password)
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[text()="ポイント交換"]')
     mutual_fund_button.click()
@@ -266,8 +266,8 @@ def move_point_mnx(url, used_id, password):
         return False
 
 
-def move_money_mnx(url, used_id, password, second_password):
-    driver: WebDriver = signin_mnx(url, used_id, password)
+def move_money_mnx(url, user_id, password, second_password):
+    driver: WebDriver = signin_mnx(url, user_id, password)
 
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[contains(text(), "入出金")]')
@@ -297,9 +297,9 @@ def move_money_mnx(url, used_id, password, second_password):
         return False
 
 
-def sell_mnx(url, used_id, password, second_password,
+def sell_mnx(url, user_id, password, second_password,
              fund_name):
-    driver: WebDriver = signin_mnx(url, used_id, password)
+    driver: WebDriver = signin_mnx(url, user_id, password)
 
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[contains(text(), "投信・積立")]')
@@ -346,6 +346,40 @@ def sell_mnx(url, used_id, password, second_password,
         return True
     except NoSuchElementException:
         return False
+
+
+def buy_nikko(url, user_id, password, second_password, fund_name):
+    driver = webdriver_start()
+    driver.get(url)
+
+    driver.find_element(by=By.NAME, value="branch-code").send_keys(user_id)
+    password = driver.find_element(by=By.NAME, value='password')
+    password.send_keys(password)
+    password.submit()
+
+    driver.get(f'https://froggy.smbcnikko.co.jp/stock/{fund_name}')
+    sleep(5)
+
+    button = driver.find_element(by=By.XPATH,
+                                 value='//button[contains(text(), "買う")]')
+    button.click()
+    sleep(5)
+
+    driver.find_element(by=By.XPATH,
+                        value='//input[@type="tel"]').send_keys(200)
+
+    button = driver.find_element(by=By.XPATH,
+                                 value='//button[contains(text(), "注文内容を確認する")]')
+    button.click()
+    sleep(5)
+    driver.find_element(by=By.XPATH,
+                        value='//input[@type="password"]').send_keys(second_password)
+
+    button = driver.find_element(by=By.XPATH,
+                                 value='//button[contains(text(), "この内容で注文する")]')
+    button.click()
+
+    sleep(4)
 
 
 def wrapper(payload: dict) -> bool:
