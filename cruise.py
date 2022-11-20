@@ -349,37 +349,41 @@ def sell_mnx(url, user_id, password, second_password,
 
 
 def buy_nikko(url, user_id, password, second_password, fund_name):
-    driver = webdriver_start()
-    driver.get(url)
+    try:
+        driver = webdriver_start()
+        driver.get(url)
+        driver.find_element(by=By.NAME, value="branch-code").send_keys(user_id)
 
-    driver.find_element(by=By.NAME, value="branch-code").send_keys(user_id)
-    password = driver.find_element(by=By.NAME, value='password')
-    password.send_keys(password)
-    password.submit()
+        password_box = driver.find_element(by=By.NAME, value='password')
+        password_box.send_keys(password)
+        password_box.submit()
+        sleep(3)
 
-    driver.get(f'https://froggy.smbcnikko.co.jp/stock/{fund_name}')
-    sleep(5)
+        driver.get(f'https://froggy.smbcnikko.co.jp/stock/{fund_name}')
+        sleep(3)
 
-    button = driver.find_element(by=By.XPATH,
-                                 value='//button[contains(text(), "買う")]')
-    button.click()
-    sleep(5)
+        button = driver.find_element(by=By.XPATH,
+                                     value='//button[contains(text(), "買う")]')
+        button.click()
+        sleep(3)
 
-    driver.find_element(by=By.XPATH,
-                        value='//input[@type="tel"]').send_keys(200)
+        driver.find_element(by=By.XPATH,
+                            value='//input[@type="tel"]').send_keys(200)
 
-    button = driver.find_element(by=By.XPATH,
-                                 value='//button[contains(text(), "注文内容を確認する")]')
-    button.click()
-    sleep(5)
-    driver.find_element(by=By.XPATH,
-                        value='//input[@type="password"]').send_keys(second_password)
+        button = driver.find_element(by=By.XPATH,
+                                     value='//button[contains(text(), "注文内容を確認する")]')
+        button.click()
+        sleep(5)
+        driver.find_element(by=By.XPATH,
+                            value='//input[@type="password"]').send_keys(second_password)
 
-    button = driver.find_element(by=By.XPATH,
-                                 value='//button[contains(text(), "この内容で注文する")]')
-    button.click()
+        button = driver.find_element(by=By.XPATH,
+                                     value='//button[contains(text(), "この内容で注文する")]')
+        button.click()
 
-    sleep(4)
+        return True
+    except Exception as e:
+        return str(e)
 
 
 def wrapper(payload: dict) -> bool:
