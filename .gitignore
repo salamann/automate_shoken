@@ -8,3 +8,8 @@ config_monex.yaml
 monex.png
 log.txt
 develop.py
+accounts.yaml
+api_settings.yaml
+mappings_names.yaml
+*.pyc
+mappings.json
