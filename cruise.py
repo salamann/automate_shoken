@@ -243,7 +243,7 @@ def move_point_mnx(url, user_id, password):
                                              value='//a[text()="ポイント交換"]')
     mutual_fund_button.click()
     sleep(3)
-    table = driver.find_elements(by=By.TAG_NAME, value='table')[2]
+    table = driver.find_elements(by=By.TAG_NAME, value='table')[1]
     [df_fund] = pandas.read_html(table.get_attribute('outerHTML'))
     [index_ponta1, index_ponta2] = [i for i, _ in enumerate(
         df_fund._values) if 'Ponta' in _[0]]
@@ -253,7 +253,7 @@ def move_point_mnx(url, user_id, password):
     point_number = point_number.text.replace('個', '').strip()
     try:
         driver.get(table.find_elements(by=By.TAG_NAME,
-                                       value='a')[index_ponta2].get_attribute('href'))
+                                       value='a')[index_ponta2+3].get_attribute('href'))
         sleep(3)
         input_box = driver.find_element(by=By.NAME, value='orderQuantity')
         input_box.send_keys(point_number)
