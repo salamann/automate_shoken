@@ -380,6 +380,7 @@ def buy_nikko(url, user_id, password, second_password, fund_name):
         button = driver.find_element(by=By.XPATH,
                                      value='//button[contains(text(), "この内容で注文する")]')
         button.click()
+        sleep(5)
 
         return True
     except Exception as e:
