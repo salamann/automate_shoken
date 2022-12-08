@@ -45,7 +45,13 @@ def webdriver_start(mode='h') -> WebDriver:
 
     # normal mode
     if mode == "n":
-        return webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        options = Options()
+        # options.add_argument('--no-sandbox')
+        # options.add_argument('--headless')
+        # options.add_argument('--disable-gpu')
+        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
+
+        return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     # chrome beta mode
     if mode == "b":

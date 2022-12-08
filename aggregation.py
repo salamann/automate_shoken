@@ -3,9 +3,11 @@ import yaml
 from time import sleep
 import json
 
+# from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 import pandas
+import requests
 
 from cruise import webdriver_start
 
@@ -408,6 +410,9 @@ def get_mochikabu(user_name, password, fund_code):
           'retrieved_by': 'mochikabu'}
     return [df]
 
+def get_usdjpy():
+    smbc = pandas.read_html(requests.get('https://www.smbc.co.jp/ex/ExchangeServlet?ScreenID=real').content)
+    return sum(smbc[0].loc[0, :].to_list()[1:])/2
 
 def run_all_with_configs(configs):
     data = []
@@ -478,6 +483,44 @@ def sum_funds(df: pandas.DataFrame):
         stocks.append(res)
     return stocks
 
+def schwab(user_name, password):
+ 
+    url = 'https://www.schwab.com/client-home'
+    # url = 'https://client.schwab.com/Login/SignOn/CustomerCenterLogin.aspx'
+    driver = webdriver_start(mode='n')
+    driver.maximize_window()
+    driver.get(url)
+    sleep(5)
+    print(driver.title)
+    
+    driver.switch_to.frame('schwablmslogin')
+    # driver.switch_to.frame('lmsSecondaryLogin')
+    driver.find_element(By.ID, 'loginIdInput').send_keys(user_name)
+    sleep(1)
+    driver.find_element(By.ID, 'passwordInput').send_keys(password)
+    sleep(1)
+    driver.find_element(By.ID, 'btnLogin').click()
+
+    sleep(5)
+
+    driver.get('https://client.schwab.com/Areas/Accounts/Positions')
+    sleep(5)
+    html = driver.find_element(By.TAG_NAME, 'html')
+    [df] = pandas.read_html(html.get_attribute('outerHTML'))
+    
+
+    usdjpy = get_usdjpy()
+
+    df.columns = [_col.split(',')[0] for _col in df.columns]
+    indices = [_index for _index, _quantity in enumerate(df['Quantity']) if isinstance(_quantity, str)][1:-1]
+    df = df.loc[indices, :]
+    df = df.loc[:, ['Symbol', 'Quantity', 'Price', 'Cost/Share']]
+    df.columns = ['fund_code', 'amount', 'current_price', 'base_price']
+    df['retrieved_by'] = ['schwab'] * len(df)
+    df['amount'] = df['amount'].astype(float)
+    df['current_price'] = [float(_cp.replace('$', ''))*usdjpy for _cp in df['current_price']]
+    df['base_price'] = [float(_cp.replace('$', ''))*usdjpy for _cp in df['base_price']]
+    return df.to_dict(orient='records')
 
 if __name__ == "__main__":
     # df = pandas.DataFrame(run_all())
