@@ -10,7 +10,7 @@ def run(args):
     for instance_name in instance_names:
         config = configs[instance_name]
         response = wrapper(config)
-        if response == True:
+        if response is True:
             color = "DarkBlue"
         else:
             color = "DarkGray"

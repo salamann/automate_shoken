@@ -142,7 +142,7 @@ def signin_rs(url, user_id, password, second_password, fund_name):
         table_element = driver.find_element(
             by=By.XPATH, value=f'//table[tbody[tr[td[div[a[contains(text(), "{fund_name}")]]]]]]')
         df_fund = pandas.read_html(table_element.get_attribute('outerHTML'))[0]
-        df_fund = df_fund[~df_fund['あしあと'].isnull()]
+        df_fund = df_fund[~df_fund['あし あと'].isnull()]
         index = df_fund['ファンド'].str.contains(fund_name).to_list().index(True)
         a_element = table_element.find_elements(
             by=By.XPATH, value='//a[img[@alt="売却"]]')[index]

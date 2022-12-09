@@ -60,7 +60,7 @@ def signin_rs_stock(user_id, password):
 
     # select 売却 for a specified stock
     table_element = driver.find_element(by=By.XPATH,
-                                        value=f'//table[@id="poss-tbl-sp"]')
+                                        value='//table[@id="poss-tbl-sp"]')
 
     df = pandas.read_html(table_element.get_attribute('outerHTML'))[0]
     df.columns = df.loc[0, :]
@@ -179,7 +179,7 @@ def signin_rs(user_id, password):
 
     # select 売却 for a specified stock
     table_element = driver.find_element(by=By.XPATH,
-                                        value=f'//table[@id="poss-tbl-sp"]')
+                                        value='//table[@id="poss-tbl-sp"]')
 
     df = pandas.read_html(table_element.get_attribute('outerHTML'))[0]
     df = df.loc[list(range(len(df)))[::3][:-1], :]
@@ -371,7 +371,8 @@ def matsui(user_name, password):
     df["amount"] = df['保有数 [株]']
     df["fund_code"] = [mappings[name] for name in df['銘柄'].to_list()]
     df['base_price'] = df['平均取得単価 [円]']
-    df['current_price']  = [remove_yen_and_comma(elem.split()[0]) for elem in df['評価単価[円] 前日比[円]'].to_list()]
+    df['current_price'] = [remove_yen_and_comma(
+        elem.split()[0]) for elem in df['評価単価[円] 前日比[円]'].to_list()]
     df['retrieved_by'] = ['matsui'] * len(df['current_price'])
     return df[['fund_code', 'current_price', 'base_price', 'amount', 'retrieved_by']].to_dict(orient='records')
 
@@ -440,7 +441,6 @@ def run_all_with_configs(configs):
     return data
 
 
-
 def read_configs(file_name='accounts.yaml'):
     with open(file_name, 'r', encoding='utf-8') as f:
         configs = yaml.safe_load(f)
@@ -456,7 +456,7 @@ def sum_funds(df: pandas.DataFrame):
         total_amount = 0
         for code, base, amount, current in zip(df['fund_code'], df['base_price'], df['amount'], df['current_price']):
             if code == stock_name:
-                total_value += int(base)*int(amount)
+                total_value += int(base) * int(amount)
                 total_amount += int(amount)
                 current_price = int(current)
         res['fund_code'] = str(stock_name)
@@ -480,7 +480,7 @@ def sum_funds(df: pandas.DataFrame):
 
 
 if __name__ == "__main__":
-    # df = pandas.DataFrame(run_all())
+    # # df = pandas.DataFrame(run_all())
     df = pandas.DataFrame(run_all_with_configs(read_configs()))
     df.to_pickle('portfolio.zip')
     elements = sum_funds(pandas.read_pickle('portfolio.zip'))
