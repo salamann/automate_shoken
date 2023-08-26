@@ -3,7 +3,7 @@ driver_settings.yaml
 *.venv
 log.csv
 config.py
-__pycache__/config.cpython-310.pyc
+__pycache__/*.pyc
 config_monex.yaml
 monex.png
 log.txt
