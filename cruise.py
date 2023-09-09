@@ -49,7 +49,8 @@ def webdriver_start(mode='h') -> WebDriver:
         # options.add_argument('--no-sandbox')
         # options.add_argument('--headless')
         # options.add_argument('--disable-gpu')
-        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
+        options.add_argument(
+            'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36')
 
         return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -74,6 +75,7 @@ def signin_sb(url, user_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
+    driver.maximize_window()
     user_card_no = driver.find_element(by=By.NAME, value="user_id")
     user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.NAME, value="user_password")
@@ -116,6 +118,7 @@ def signin_rs(url, user_id, password, second_password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
+    driver.maximize_window()
     user_card_no = driver.find_element(by=By.ID, value="form-login-id")
     user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="form-login-pass")
@@ -180,6 +183,7 @@ def signin_mufg(url, user_id, password, fund_name):
     driver = webdriver_start()
 
     driver.get(url)
+    driver.maximize_window()
     user_card_no = driver.find_element(by=By.ID, value="tx-contract-number")
     user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="tx-ib-password")
@@ -230,6 +234,7 @@ def signin_mnx(url, user_id, password):
     driver = webdriver_start()
 
     driver.get(url)
+    driver.maximize_window()
     user_card_no = driver.find_element(by=By.ID, value="loginid")
     user_card_no.send_keys(user_id)
     user_password = driver.find_element(by=By.ID, value="passwd")
@@ -245,6 +250,7 @@ def signin_mnx(url, user_id, password):
 
 def move_point_mnx(url, user_id, password):
     driver: WebDriver = signin_mnx(url, user_id, password)
+    driver.maximize_window()
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[text()="ポイント交換"]')
     mutual_fund_button.click()
@@ -259,7 +265,7 @@ def move_point_mnx(url, user_id, password):
     point_number = point_number.text.replace('個', '').strip()
     try:
         driver.get(table.find_elements(by=By.TAG_NAME,
-                                       value='a')[index_ponta2+3].get_attribute('href'))
+                                       value='a')[index_ponta2 + 3].get_attribute('href'))
         sleep(3)
         input_box = driver.find_element(by=By.NAME, value='orderQuantity')
         input_box.send_keys(point_number)
@@ -274,6 +280,7 @@ def move_point_mnx(url, user_id, password):
 
 def move_money_mnx(url, user_id, password, second_password):
     driver: WebDriver = signin_mnx(url, user_id, password)
+    driver.maximize_window()
 
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[contains(text(), "入出金")]')
@@ -306,6 +313,7 @@ def move_money_mnx(url, user_id, password, second_password):
 def sell_mnx(url, user_id, password, second_password,
              fund_name):
     driver: WebDriver = signin_mnx(url, user_id, password)
+    driver.maximize_window()
 
     mutual_fund_button = driver.find_element(by=By.XPATH,
                                              value='//a[contains(text(), "投信・積立")]')
@@ -358,6 +366,7 @@ def buy_nikko(url, user_id, password, second_password, fund_name):
     try:
         driver = webdriver_start()
         driver.get(url)
+        driver.maximize_window()
         driver.find_element(by=By.NAME, value="branch-code").send_keys(user_id)
 
         password_box = driver.find_element(by=By.NAME, value='password')
