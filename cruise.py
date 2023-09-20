@@ -77,7 +77,8 @@ def webdriver_start(mode="h") -> WebDriver:
         options = Options()
         configs = read_config(file_name="driver_settings.yaml")
         options.binary_location = configs["chrome"]["path"]
-        chrome_service = Service(executable_path=configs["chrome"]["driver_path"])
+        chrome_service = Service(
+            executable_path=configs["chrome"]["driver_path"])
 
         return webdriver.Chrome(service=chrome_service, options=options)
 
@@ -101,7 +102,8 @@ def signin_sb(url, user_id, password, second_password, fund_name):
     signin_button.click()
 
     sleep(3)
-    a_element = driver.find_element(by=By.XPATH, value="//a[img[@title='ポートフォリオ']]")
+    a_element = driver.find_element(
+        by=By.XPATH, value="//a[img[@title='ポートフォリオ']]")
     a_element.click()
 
     try:
@@ -163,7 +165,8 @@ def signin_rs(url, user_id, password, second_password, fund_name):
         pass
 
     # hit 保有商品一覧 button
-    a_element = driver.find_element(by=By.XPATH, value='//a[img[@title="保有商品一覧"]]')
+    a_element = driver.find_element(
+        by=By.XPATH, value='//a[img[@title="保有商品一覧"]]')
     a_element.click()
 
     # select 売却 for a specified stock
@@ -232,7 +235,8 @@ def signin_mufg(url, user_id, password, fund_name):
     try:
 
         def hit_tsugihe(driver):
-            button_next = driver.find_element(by=By.XPATH, value="//a[img[@alt='次へ']]")
+            button_next = driver.find_element(
+                by=By.XPATH, value="//a[img[@alt='次へ']]")
             button_next.click()
 
         hit_tsugihe(driver)
@@ -247,7 +251,8 @@ def signin_mufg(url, user_id, password, fund_name):
         hit_tsugihe(driver)
         sleep(2)
 
-        button_next = driver.find_element(by=By.XPATH, value="//a[img[@alt='解約']]")
+        button_next = driver.find_element(
+            by=By.XPATH, value="//a[img[@alt='解約']]")
         button_next.click()
         sleep(1)
         return True
@@ -276,7 +281,8 @@ def signin_mnx(url, user_id, password):
 def move_point_mnx(url, user_id, password):
     driver: WebDriver = signin_mnx(url, user_id, password)
     driver.maximize_window()
-    mutual_fund_button = driver.find_element(by=By.XPATH, value='//a[text()="ポイント交換"]')
+    mutual_fund_button = driver.find_element(
+        by=By.XPATH, value='//a[text()="ポイント交換"]')
     mutual_fund_button.click()
     sleep(3)
     table = driver.find_elements(by=By.TAG_NAME, value="table")[1]
@@ -315,13 +321,15 @@ def move_money_mnx(url, user_id, password, second_password):
     )
     mutual_fund_button.click()
     sleep(3)
-    mutual_fund_button = driver.find_element(by=By.XPATH, value='//a[text()="出金指示"]')
+    mutual_fund_button = driver.find_element(
+        by=By.XPATH, value='//a[text()="出金指示"]')
     driver.get(mutual_fund_button.get_attribute("href"))
     # mutual_fund_button.click()
     table = driver.find_element(by=By.TAG_NAME, value="table")
     [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
     try:
-        max_amount = df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[0]
+        max_amount = df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[
+            0]
         max_amount = max_amount.replace("円", "").replace(",", "")
 
         input_amount = driver.find_element(by=By.ID, value="Amount")
@@ -382,7 +390,8 @@ def sell_mnx(url, user_id, password, second_password, fund_name):
         confirm_button.click()
         sleep(3)
 
-        second_password_element = driver.find_element(by=By.ID, value="idPinNo")
+        second_password_element = driver.find_element(
+            by=By.ID, value="idPinNo")
         second_password_element.send_keys(second_password)
 
         sleep(3)
@@ -407,25 +416,27 @@ def buy_nikko(url, user_id, password, second_password, fund_name):
         password_box = driver.find_element(by=By.NAME, value="password")
         password_box.send_keys(password)
         password_box.submit()
-        sleep(3)
+        sleep(10)
 
         driver.get(f"https://froggy.smbcnikko.co.jp/stock/{fund_name}")
-        sleep(5)
+        sleep(10)
 
         button = driver.find_element(
             by=By.XPATH, value='//button[contains(text(), "買う")]'
         )
         button.click()
-        sleep(3)
+        sleep(10)
 
-        driver.find_element(by=By.XPATH, value='//input[@type="tel"]').send_keys(200)
-        driver.find_element(by=By.CLASS_NAME, value="orderForm__checkbox").click()
+        driver.find_element(
+            by=By.XPATH, value='//input[@type="tel"]').send_keys(200)
+        driver.find_element(
+            by=By.CLASS_NAME, value="orderForm__checkbox").click()
         button = driver.find_element(
             by=By.XPATH, value='//button[contains(text(), "注文内容を確認する")]'
         )
 
         button.click()
-        sleep(5)
+        sleep(10)
         driver.find_element(by=By.XPATH, value='//input[@type="password"]').send_keys(
             second_password
         )
@@ -434,7 +445,7 @@ def buy_nikko(url, user_id, password, second_password, fund_name):
             by=By.XPATH, value='//button[contains(text(), "この内容で注文する")]'
         )
         button.click()
-        sleep(5)
+        sleep(10)
 
         return True
     except Exception as e:
@@ -467,7 +478,8 @@ def wrapper(payload: dict) -> bool:
                 payload["second_password"],
             )
         elif ("second_password" not in payload) & ("fund_name" not in payload):
-            response = func(payload["url"], payload["user_id"], payload["password"])
+            response = func(
+                payload["url"], payload["user_id"], payload["password"])
 
     except Exception as e:
         response = str(e)
