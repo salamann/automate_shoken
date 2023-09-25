@@ -429,13 +429,14 @@ def buy_nikko(url, user_id, password, second_password, fund_name):
 
         driver.find_element(
             by=By.XPATH, value='//input[@type="tel"]').send_keys(200)
-        driver.find_element(
-            by=By.CLASS_NAME, value="orderForm__checkbox").click()
-        button = driver.find_element(
-            by=By.XPATH, value='//button[contains(text(), "注文内容を確認する")]'
-        )
-
+        try:
+            driver.find_element(by=By.CLASS_NAME, value="orderForm__checkbox").click()
+        except NoSuchElementException:
+            pass
+        button = driver.find_element(by=By.XPATH,
+                                     value='//button[contains(text(), "注文内容を確認する")]')
         button.click()
+
         sleep(10)
         driver.find_element(by=By.XPATH, value='//input[@type="password"]').send_keys(
             second_password
