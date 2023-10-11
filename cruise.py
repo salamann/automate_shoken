@@ -293,7 +293,7 @@ def move_point_mnx(url, user_id, password):
     point_number = table.find_elements(by=By.TAG_NAME, value="tr")[
         index_ponta1 + 2
     ].find_elements(by=By.TAG_NAME, value="td")[-1]
-    point_number = point_number.text.replace("個", "").strip()
+    point_number = point_number.text.replace("個", "").replace(",", "").strip()
     try:
         driver.get(
             table.find_elements(by=By.TAG_NAME, value="a")[
