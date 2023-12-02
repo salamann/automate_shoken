@@ -352,7 +352,7 @@ def sell_mnx(url, user_id, password, second_password, fund_name):
         by=By.XPATH, value="//a[contains(text(), '保有残高・売却')]"
     )
     driver.get(sell_button.get_attribute("href"))
-    sell_button.click()
+    # sell_button.click()
 
     try:
         table_element = driver.find_element(
