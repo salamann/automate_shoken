@@ -101,7 +101,9 @@ def signin_sb(url, user_id, password, second_password, fund_name):
     signin_button.click()
 
     sleep(3)
-    a_element = driver.find_element(by=By.XPATH, value="//a[img[@title='ポートフォリオ']]")
+    a_element = driver.find_element(
+        by=By.XPATH, value="//a[img[@title='ポートフォリオ']]"
+    )
     a_element.click()
 
     try:
@@ -159,14 +161,16 @@ def signin_rs(url, user_id, password, second_password, fund_name):
             by=By.CLASS_NAME, value="modal__button--normal"
         )
         normal_mode_button.click()
-    except ElementNotInteractableException:
+    except (ElementNotInteractableException, NoSuchElementException):
         pass
-
+    sleep(3)
     # hit 保有商品一覧 button
-    a_element = driver.find_element(by=By.XPATH, value='//a[img[@title="保有商品一覧"]]')
-    a_element.click()
+    driver.find_element(
+        By.XPATH, '//button[span[contains(text(), "保有商品")]]'
+    ).click()
 
     # select 売却 for a specified stock
+    # try:
     try:
         table_element = driver.find_element(
             by=By.XPATH,
@@ -232,7 +236,9 @@ def signin_mufg(url, user_id, password, fund_name):
     try:
 
         def hit_tsugihe(driver):
-            button_next = driver.find_element(by=By.XPATH, value="//a[img[@alt='次へ']]")
+            button_next = driver.find_element(
+                by=By.XPATH, value="//a[img[@alt='次へ']]"
+            )
             button_next.click()
 
         hit_tsugihe(driver)
@@ -276,7 +282,9 @@ def signin_mnx(url, user_id, password):
 def move_point_mnx(url, user_id, password):
     driver: WebDriver = signin_mnx(url, user_id, password)
     driver.maximize_window()
-    mutual_fund_button = driver.find_element(by=By.XPATH, value='//a[text()="ポイント交換"]')
+    mutual_fund_button = driver.find_element(
+        by=By.XPATH, value='//a[text()="ポイント交換"]'
+    )
     mutual_fund_button.click()
     sleep(3)
     table = driver.find_elements(by=By.TAG_NAME, value="table")[1]
@@ -315,13 +323,17 @@ def move_money_mnx(url, user_id, password, second_password):
     )
     mutual_fund_button.click()
     sleep(3)
-    mutual_fund_button = driver.find_element(by=By.XPATH, value='//a[text()="出金指示"]')
+    mutual_fund_button = driver.find_element(
+        by=By.XPATH, value='//a[text()="出金指示"]'
+    )
     driver.get(mutual_fund_button.get_attribute("href"))
     # mutual_fund_button.click()
     table = driver.find_element(by=By.TAG_NAME, value="table")
     [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
     try:
-        max_amount = df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[0]
+        max_amount = (
+            df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[0]
+        )
         max_amount = max_amount.replace("円", "").replace(",", "")
 
         input_amount = driver.find_element(by=By.ID, value="Amount")
