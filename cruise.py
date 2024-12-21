@@ -354,7 +354,7 @@ def sell_mnx(url, user_id, password, second_password, fund_name):
     driver.maximize_window()
 
     mutual_fund_button = driver.find_element(
-        by=By.XPATH, value='//a[contains(text(), "投信・積立")]'
+        by=By.XPATH, value='//a[contains(text(), "投信･積立")]'
     )
     mutual_fund_button.click()
 
