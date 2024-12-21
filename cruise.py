@@ -319,15 +319,12 @@ def move_money_mnx(url, user_id, password, second_password):
         by=By.XPATH, value='//a[text()="出金指示"]'
     )
     driver.get(mutual_fund_button.get_attribute("href"))
-    # mutual_fund_button.click()
-    table = driver.find_element(by=By.TAG_NAME, value="table")
-    [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
-    try:
-        max_amount = (
-            df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[0]
-        )
-        max_amount = max_amount.replace("円", "").replace(",", "")
 
+    table = driver.find_elements(by=By.TAG_NAME, value="table")[-1]
+    [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
+    max_amount = df_fund[df_fund[0].str.contains("出金可能額")].loc[:, 1].to_list()[0]
+    max_amount = max_amount.replace("円", "").replace(",", "")
+    if int(max_amount) != 0:
         input_amount = driver.find_element(by=By.ID, value="Amount")
         input_amount.send_keys(max_amount)
         input_amount.submit()
@@ -336,8 +333,11 @@ def move_money_mnx(url, user_id, password, second_password):
         input_amount = driver.find_element(by=By.ID, value="idPinNo")
         input_amount.send_keys(second_password)
         input_amount.submit()
+        sleep(3)
+        driver.close()
         return True
-    except IndexError:
+    else:
+        driver.close()
         return False
 
 
