@@ -282,33 +282,25 @@ def signin_mnx(url, user_id, password):
 def move_point_mnx(url, user_id, password):
     driver: WebDriver = signin_mnx(url, user_id, password)
     driver.maximize_window()
-    mutual_fund_button = driver.find_element(
-        by=By.XPATH, value='//a[text()="ポイント交換"]'
-    )
-    mutual_fund_button.click()
+    driver.find_element(By.XPATH, '//a[text()="マネックスポイント"]').click()
     sleep(3)
-    table = driver.find_elements(by=By.TAG_NAME, value="table")[1]
-    [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
-    [index_ponta1, index_ponta2] = [
-        i for i, _ in enumerate(df_fund._values) if "Ponta" in _[0]
-    ]
-    point_number = table.find_elements(by=By.TAG_NAME, value="tr")[
-        index_ponta1 + 2
-    ].find_elements(by=By.TAG_NAME, value="td")[-1]
-    point_number = point_number.text.replace("個", "").replace(",", "").strip()
+    driver.find_element(By.XPATH, '//a[img[@alt="Pontaポイント"]]').click()
+    sleep(3)
+
+    driver.find_element(By.XPATH, '//a[text()="交換"]').click()
+    sleep(3)
     try:
-        driver.get(
-            table.find_elements(by=By.TAG_NAME, value="a")[
-                index_ponta2 + 3
-            ].get_attribute("href")
+        table = driver.find_elements(by=By.TAG_NAME, value="table")[1]
+        [df_fund] = pandas.read_html(table.get_attribute("outerHTML"))
+        ponta_point_num = int(df_fund.loc[0, df_fund.columns[-1]].replace("個", ""))
+
+        driver.find_element(By.XPATH, '//input[@name="orderQuantity"]').send_keys(
+            ponta_point_num
         )
+        driver.find_element(By.XPATH, '//input[@alt="次へ（入力内容確認）"]').click()
         sleep(3)
-        input_box = driver.find_element(by=By.NAME, value="orderQuantity")
-        input_box.send_keys(point_number)
-        input_box.submit()
+        driver.find_element(By.XPATH, '//input[@alt="ポイントを使う"]').click()
         sleep(3)
-        input_box = driver.find_element(by=By.NAME, value="modifyBtn")
-        input_box.submit()
         return True
     except IndexError:
         return False
