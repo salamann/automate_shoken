@@ -136,7 +136,7 @@ def signin_sb(url, user_id, password, second_password, fund_name):
 
 
 def signin_rs(url, user_id, password, second_password, fund_name):
-    driver = webdriver_start()
+    driver = webdriver_start(mode="n")
 
     driver.get(url)
     driver.maximize_window()
@@ -352,9 +352,9 @@ def sell_mnx(url, user_id, password, second_password, fund_name):
 
     sleep(3)
 
-    sell_button = driver.find_element(
+    sell_button = driver.find_elements(
         by=By.XPATH, value="//a[contains(text(), '保有残高・売却')]"
-    )
+    )[-1]
     driver.get(sell_button.get_attribute("href"))
     # sell_button.click()
 
